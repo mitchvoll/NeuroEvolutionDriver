@@ -12,6 +12,7 @@ Right now there are two main objects: the car and the track. Both of them have h
 - Need to keep track of distance. I was thinking there are two main ways we can keep track of distance:
   1. Just measure the total distance the car has traveled however this doesn't always measure how far into the track the car has gone.
   2. Have lines spaced out around the track and just count the number of lines the car has passed as a measure of distance. I personally think this is a better option however it might be a bit trickier to setup.
+- Should be rewritten to be oject-oriented so we're not polluting the global scope. This will make things easier when we need to implement the NN. 
 
 ## Running the environment
 If you have node installed then you can just run: `npm install` to install dependencies and then `node index.js` to run the server.
