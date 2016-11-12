@@ -49,31 +49,57 @@ function create() {
 	lastIntersectTime = game.time.now; // for reading sensor input every interval
 }
 
+function turnLeft(){
+	car.body.angularVelocity = -9*(velocity/1000);
+	velocity *= 0.75;
+}
 
-// update loop
-function update(){
-	// update velocity
-	if (cursors.up.isDown && velocity <= 400) { // speed up
-			velocity = 200;
+function turnRight(){
+	car.body.angularVelocity = 9*(velocity/1000);
+	velocity *= 0.75;
+}
+
+// simple driver turns away from walls its too close to 
+function simpleDriver(){
+	// always move
+	velocity = 200;
+
+	// left sensor
+	if (si.sensor2 && si.sensor2.d < 80){
+		console.log("turn right")
+		turnRight();
 	}
-	else if (cursors.down.isDown){ // brake
-		velocity = -200;
-	}
-	else // slow down
-		velocity = 0;
-	
-	// Rotation of Car
-	if (cursors.left.isDown){
-		car.body.angularVelocity = -9*(velocity/1000);
-		velocity *= 0.75;
-	}
-	else if (cursors.right.isDown){
-		car.body.angularVelocity = 9*(velocity/1000);
-		velocity *= 0.75;
+	// right sensor
+	else if (si.sensor3 && si.sensor3.d < 80){
+		console.log("turn left")
+		turnLeft();
 	}
 	else{
 		car.body.angularVelocity = 0;
 	}
+}
+
+// update loop
+function update(){
+	// Keyboard control
+	// update velocity
+	if (cursors.up.isDown && velocity <= 400) // speed up
+		velocity = 200;
+	else if (cursors.down.isDown) // brake
+		velocity = -200;
+	else // slow down
+		velocity = 0;
+	
+	// Rotation of Car
+	if (cursors.left.isDown)
+		turnLeft();
+	else if (cursors.right.isDown)
+		turnRight();
+	else
+		car.body.angularVelocity = 0;
+	
+	// drive using simple driver
+	simpleDriver();
 
 	// Set X and Y Speed of Velocity
 	car.body.velocity.x = velocity * Math.cos((car.angle-90)*0.01745);
@@ -110,7 +136,6 @@ function hitWall(body, bodyB, shapeA, shapeB, equation){
 	console.dir(shapeB);
 	// reset car position
 	console.log(car.x, car.y);
-	console.dir(equation);
 	velocity = 0;
 	car.body.x = 570;
 	car.body.y = 100;
