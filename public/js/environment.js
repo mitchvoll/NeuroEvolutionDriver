@@ -60,17 +60,17 @@ function turnRight(){
 }
 
 // simple driver turns away from walls its too close to 
-function simpleDriver(){
+function simpleDriver(speed=200, avoidanceThresh=80){
 	// always move
-	velocity = 200;
+	velocity = speed;
 
 	// left sensor
-	if (si.sensor2 && si.sensor2.d < 80){
+	if (si.sensor2 && si.sensor2.d < avoidanceThresh){
 		console.log("turn right")
 		turnRight();
 	}
 	// right sensor
-	else if (si.sensor3 && si.sensor3.d < 80){
+	else if (si.sensor3 && si.sensor3.d < avoidanceThresh){
 		console.log("turn left")
 		turnLeft();
 	}

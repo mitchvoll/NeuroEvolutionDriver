@@ -8,11 +8,11 @@ Right now there are two main objects: the car and the track. Both of them have h
   - **update():** this runs on a loop for every frame of the game is where the car's movement is updated. When we interface with our neural net it will drive the car from here.
   
 ## TODO
-- Need to finish raycasting. I haven't figured out how to get the line intersection between the rays that represent proximity sensors and the track boundaries. Right now the rays are being cast at angles -45, 0, and 45 where 0 is the direction the car is traveling, however I am not yet getting the position that those rays intersect with the track. 
-- Need to keep track of distance. I was thinking there are two main ways we can keep track of distance:
+- - Need to keep track of distance. I was thinking there are two main ways we can keep track of distance:
   1. Just measure the total distance the car has traveled however this doesn't always measure how far into the track the car has gone.
   2. Have lines spaced out around the track and just count the number of lines the car has passed as a measure of distance. I personally think this is a better option however it might be a bit trickier to setup.
 - Should be rewritten to be oject-oriented so we're not polluting the global scope. This will make things easier when we need to implement the NN. 
+- Setup a simple NN
 
 ## Running the environment
 If you have node installed then you can just run: `npm install` to install dependencies and then `node index.js` to run the server.
