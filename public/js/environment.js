@@ -10,7 +10,10 @@ var cursors, // keyboard
 	lines = JSON.parse('[{"x1":181,"y1":146,"x2":943.5,"y2":143.5},{"x1":944,"y1":144,"x2":971.5,"y2":159.5},{"x1":971,"y1":160,"x2":985.5,"y2":184.5},{"x1":986,"y1":189,"x2":986.5,"y2":315.5},{"x1":987,"y1":316,"x2":977.5,"y2":343.5},{"x1":978,"y1":344,"x2":960.5,"y2":366.5},{"x1":961,"y1":367,"x2":916.5,"y2":370.5},{"x1":917,"y1":371,"x2":855.5,"y2":389.5},{"x1":856,"y1":390,"x2":809.5,"y2":420.5},{"x1":810,"y1":421,"x2":773.5,"y2":463.5},{"x1":773,"y1":467,"x2":749.5,"y2":525.5},{"x1":749,"y1":525,"x2":745.5,"y2":592.5},{"x1":746,"y1":593,"x2":729.5,"y2":610.5},{"x1":731,"y1":612,"x2":700.5,"y2":627.5},{"x1":698.5,"y1":625.5,"x2":200.5,"y2":627.5},{"x1":200,"y1":631,"x2":154.5,"y2":605.5},{"x1":155,"y1":606,"x2":142.5,"y2":575.5},{"x1":144,"y1":576,"x2":146.5,"y2":191.5},{"x1":146,"y1":192,"x2":156.5,"y2":166.5},{"x1":157,"y1":167,"x2":181.5,"y2":144.5},{"x1":175.5,"y1":7.5,"x2":946.5,"y2":6.5},{"x1":948,"y1":9,"x2":989.5,"y2":17.5},{"x1":989,"y1":17,"x2":1037.5,"y2":39.5},{"x1":1038.5,"y1":40.5,"x2":1073.5,"y2":73.5},{"x1":1073.5,"y1":72.5,"x2":1101.5,"y2":110.5},{"x1":1102,"y1":112,"x2":1122.5,"y2":176.5},{"x1":1123,"y1":180,"x2":1122.5,"y2":321.5},{"x1":1122,"y1":326,"x2":1106.5,"y2":386.5},{"x1":1107,"y1":387,"x2":1083.5,"y2":431.5},{"x1":1084,"y1":432,"x2":1051.5,"y2":465.5},{"x1":1052,"y1":465,"x2":1006.5,"y2":493.5},{"x1":1010,"y1":492,"x2":954.5,"y2":504.5},{"x1":960,"y1":506,"x2":921.5,"y2":506.5},{"x1":922.5,"y1":506.5,"x2":898.5,"y2":515.5},{"x1":898.5,"y1":516.5,"x2":882.5,"y2":538.5},{"x1":885,"y1":542,"x2":873.5,"y2":618.5},{"x1":875,"y1":619,"x2":859.5,"y2":663.5},{"x1":860,"y1":663,"x2":810.5,"y2":722.5},{"x1":811,"y1":723,"x2":739.5,"y2":753.5},{"x1":739,"y1":756,"x2":683.5,"y2":760.5},{"x1":684,"y1":761,"x2":192.5,"y2":759.5},{"x1":193,"y1":762,"x2":134.5,"y2":748.5},{"x1":137,"y1":749,"x2":75.5,"y2":714.5},{"x1":76,"y1":715,"x2":47.5,"y2":678.5},{"x1":48,"y1":679,"x2":21.5,"y2":629.5},{"x1":22.5,"y1":630.5,"x2":13.5,"y2":593.5},{"x1":15,"y1":596,"x2":12.5,"y2":170.5},{"x1":11.5,"y1":168.5,"x2":23.5,"y2":129.5},{"x1":24,"y1":130,"x2":53.5,"y2":74.5},{"x1":54,"y1":75,"x2":84.5,"y2":44.5},{"x1":84,"y1":47,"x2":130.5,"y2":21.5},{"x1":131,"y1":22,"x2":175.5,"y2":7.5}]'); // the track boundary for sensor intersection
 
 
-// preload all assets 
+// preload function 
+// Takes no arguments and returns void
+// Simply preloads resources like the track image and car sprite
+// Also loads a json object containing collision information
 function preload() {
 	// load sprites
 	game.load.image('map', 'assets/map.jpg');
@@ -22,6 +25,20 @@ function preload() {
 	game.stage.disableVisibilityChange = true; // game runs when window is not in focus
 }
 
+// globals 
+var cursors, // keyboard
+ 	car, // car
+	track, // the physics object for the track boundaries
+ 	velocity = 0, // initial car velocity
+	sensor1, sensor2, sensor3, si = {}, // sensors
+	currentLap, lapTimes = [],
+	trackLines, // the lines will be stored as an array of phaser line objects
+	lines = JSON.parse('[{"x1":181,"y1":146,"x2":943.5,"y2":143.5},{"x1":944,"y1":144,"x2":971.5,"y2":159.5},{"x1":971,"y1":160,"x2":985.5,"y2":184.5},{"x1":986,"y1":189,"x2":986.5,"y2":315.5},{"x1":987,"y1":316,"x2":977.5,"y2":343.5},{"x1":978,"y1":344,"x2":960.5,"y2":366.5},{"x1":961,"y1":367,"x2":916.5,"y2":370.5},{"x1":917,"y1":371,"x2":855.5,"y2":389.5},{"x1":856,"y1":390,"x2":809.5,"y2":420.5},{"x1":810,"y1":421,"x2":773.5,"y2":463.5},{"x1":773,"y1":467,"x2":749.5,"y2":525.5},{"x1":749,"y1":525,"x2":745.5,"y2":592.5},{"x1":746,"y1":593,"x2":729.5,"y2":610.5},{"x1":731,"y1":612,"x2":700.5,"y2":627.5},{"x1":698.5,"y1":625.5,"x2":200.5,"y2":627.5},{"x1":200,"y1":631,"x2":154.5,"y2":605.5},{"x1":155,"y1":606,"x2":142.5,"y2":575.5},{"x1":144,"y1":576,"x2":146.5,"y2":191.5},{"x1":146,"y1":192,"x2":156.5,"y2":166.5},{"x1":157,"y1":167,"x2":181.5,"y2":144.5},{"x1":175.5,"y1":7.5,"x2":946.5,"y2":6.5},{"x1":948,"y1":9,"x2":989.5,"y2":17.5},{"x1":989,"y1":17,"x2":1037.5,"y2":39.5},{"x1":1038.5,"y1":40.5,"x2":1073.5,"y2":73.5},{"x1":1073.5,"y1":72.5,"x2":1101.5,"y2":110.5},{"x1":1102,"y1":112,"x2":1122.5,"y2":176.5},{"x1":1123,"y1":180,"x2":1122.5,"y2":321.5},{"x1":1122,"y1":326,"x2":1106.5,"y2":386.5},{"x1":1107,"y1":387,"x2":1083.5,"y2":431.5},{"x1":1084,"y1":432,"x2":1051.5,"y2":465.5},{"x1":1052,"y1":465,"x2":1006.5,"y2":493.5},{"x1":1010,"y1":492,"x2":954.5,"y2":504.5},{"x1":960,"y1":506,"x2":921.5,"y2":506.5},{"x1":922.5,"y1":506.5,"x2":898.5,"y2":515.5},{"x1":898.5,"y1":516.5,"x2":882.5,"y2":538.5},{"x1":885,"y1":542,"x2":873.5,"y2":618.5},{"x1":875,"y1":619,"x2":859.5,"y2":663.5},{"x1":860,"y1":663,"x2":810.5,"y2":722.5},{"x1":811,"y1":723,"x2":739.5,"y2":753.5},{"x1":739,"y1":756,"x2":683.5,"y2":760.5},{"x1":684,"y1":761,"x2":192.5,"y2":759.5},{"x1":193,"y1":762,"x2":134.5,"y2":748.5},{"x1":137,"y1":749,"x2":75.5,"y2":714.5},{"x1":76,"y1":715,"x2":47.5,"y2":678.5},{"x1":48,"y1":679,"x2":21.5,"y2":629.5},{"x1":22.5,"y1":630.5,"x2":13.5,"y2":593.5},{"x1":15,"y1":596,"x2":12.5,"y2":170.5},{"x1":11.5,"y1":168.5,"x2":23.5,"y2":129.5},{"x1":24,"y1":130,"x2":53.5,"y2":74.5},{"x1":54,"y1":75,"x2":84.5,"y2":44.5},{"x1":84,"y1":47,"x2":130.5,"y2":21.5},{"x1":131,"y1":22,"x2":175.5,"y2":7.5}]'); // the track boundary for sensor intersection
+
+// create()
+// Takes no arguments and returns void 
+// Creates various game objects (track, car, tracklines); sets initial values for objects
+// Adds them to the phaser game object created on the first line
 function create() {
 	// enable p2 physics http://phaser.io/examples/v2/category/p2-physics
 	game.physics.startSystem(Phaser.Physics.P2JS);
@@ -59,11 +76,18 @@ function create() {
 	NN.init(3, 1, 10, 4);
 }
 
+
+// turnLeft()
+// Takes no arguments and returns void
+// Modifies the car's angular velocity and forward velocity to perform a left turn
 function turnLeft(){
 	car.body.angularVelocity = -9*(velocity/1000);
 	velocity *= 0.75;
 }
 
+// turnRight()
+// Takes no arguments and returns void
+// Modifies the car's angular velocity and forward velocity to perform a right turn
 function turnRight(){
 	car.body.angularVelocity = 9*(velocity/1000);
 	velocity *= 0.75;
@@ -102,7 +126,11 @@ function simpleDriver(speed=400, avoidanceThresh=80){
 	}
 }
 
-// update loop
+// update()
+// takes no arguments and returns void
+// Serves as the main loop for the program, finds POI for sensors
+// turns the car left or right based on distance to track boundary
+
 function update(){
 	// get lines for sensors 
 	sensor1 = getLine(0, 250);	
@@ -146,6 +174,9 @@ function update(){
 	car.body.velocity.y = velocity * Math.sin((car.angle-90)*0.01745);
 }
 
+// render()
+// Takes no arguments and returns void 
+// Draws the textual information on screen that contains sensor and lap information
 function render(){
 	game.debug.text("sensor1 dist: " + Math.round(si.sensor1.d), 200, 200);
 	game.debug.text("sensor2 dist: " + Math.round(si.sensor2.d), 200, 250);
@@ -154,12 +185,15 @@ function render(){
 	game.debug.text("genome: " + NN.genome, 200, 400);
 }
 
+// bestLap()
+// Takes no arguments, returns the minimum lap time
 function bestLap(){
 	return Math.min.apply(Math, lapTimes); // return the best lap time
 }
 
 
-// called when car hits a collidable object 
+// carCollision() // called when car hits a collidable object (Track boundaries, finish line) // Takes the two colliding bodies, their shapes, and the equation to use for the collision
+// returns void
 function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 	// passed the start finish line
 	if (bodyB.id == startFinish.body.id){
@@ -185,15 +219,19 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 	}
 }
 
-// returns a line from the car to a point x2,y2 that is the length of the 
-// distance specified at the specified angle
+// getLine()
+// Takes an angle and a distance
+// Draws a line at the angle for the distance from the car
+// returns the line as a Phaser Line object
 function getLine(angle, distance){
 	var x2 = Math.cos((car.angle-(90+angle))*0.01745)*distance;
 	var y2 = Math.sin((car.angle-(90+angle))*0.01745)*distance;
 	return new Phaser.Line(car.x, car.y, car.x + x2, car.y + y2);
 }
 
-// returns point for intersections with trackLines for a given line
+// lineIntersect()
+// Takes a line 
+// returns JSON object containing point for intersections with trackLines for the given line
 function lineIntersect(line){
 	// point of intersection and distance
 	var point = null, distance = Number.POSITIVE_INFINITY;
@@ -208,7 +246,9 @@ function lineIntersect(line){
 	return { p: point, d: distance };
 	}
 
-// returns the intersection data for each sensor 
+// getSensorData()
+// Takes no arguments
+// returns the intersection data for each sensor as a JSON object
 function getSensorData(){
 	return { 
 		sensor1: lineIntersect(sensor1),
@@ -217,40 +257,3 @@ function getSensorData(){
 	};
 }
 
-
-
-//making lines
-//var lines = [];
-//var line1, handle1, handle2, nextClick;
-//function makeLines(){
-//
-//	if (game.input.activePointer.rightButton.isDown && game.time.now > nextClick){
-//		if (line1){
-//			lines.push( {x1: line1.start.x, y1: line1.start.y, x2: line1.end.x, y2: line1.end.y} );
-//		}
-//		handle1 = game.add.sprite(game.input.activePointer.x, game.input.activePointer.y, 'balls', 0);
-//		handle1.anchor.set(0.5);
-//		handle1.inputEnabled = true;
-//		handle1.input.enableDrag(true);
-//		handle1.alpha = 0.3;
-//
-//		handle2 = game.add.sprite(game.input.activePointer.x+10, game.input.activePointer.y+10, 'balls', 0);
-//		handle2.anchor.set(0.5);
-//		handle2.inputEnabled = true;
-//		handle2.input.enableDrag(true);
-//		handle2.alpha = 0.3;
-//
-//		line1 = new Phaser.Line(handle1.x, handle1.y, handle2.x, handle2.y);
-//		nextClick = game.time.now + 500;
-//	}
-//	if (handle1 && handle1){
-//		line1.fromSprite(handle1, handle2, false);
-//		game.debug.geom(line1);
-//	}
-//	if (cursors.down.isDown && game.time.now > nextClick){
-//		console.log('saving');
-//		lines.push( {x1: line1.start.x, y1: line1.start.y, x2: line1.end.x, y2: line1.end.y} );
-//		console.log(JSON.stringify(lines));
-//		nextClick = game.time.now + 500;
-//	}
-//}
