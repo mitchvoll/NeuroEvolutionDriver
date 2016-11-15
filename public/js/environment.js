@@ -57,7 +57,7 @@ function create() {
 	trackLines = lines.map(function(obj){ return new Phaser.Line(obj.x1, obj.y1, obj.x2, obj.y2) });
 	
 	// add car
-	car = game.add.sprite(570, 100, 'car');
+	car = game.add.sprite(570, 80, 'car');
 	game.physics.p2.enable(car);
 	car.body.clearShapes();
 	car.body.loadPolygon('collisions', 'car');
@@ -94,9 +94,11 @@ function turnRight(){
 }
 
 function ANNDriver(speed){
+	driver = "NN";
 	velocity = speed;
 
 	var output = NN.activate(si);
+	console.log(output);
 	if (output > 0.666)
 		turnRight();
 	else if (output < 0.333)
@@ -167,7 +169,7 @@ function update(){
 	
 	// drive using simple driver
 	//simpleDriver();
-	ANNDriver(200);
+	ANNDriver(400);
 
 	// Set X and Y Speed of Velocity
 	car.body.velocity.x = velocity * Math.cos((car.angle-90)*0.01745);
@@ -182,7 +184,7 @@ function render(){
 	game.debug.text("sensor2 dist: " + Math.round(si.sensor2.d), 200, 250);
 	game.debug.text("sensor3 dist: " + Math.round(si.sensor3.d), 200, 300);
 	game.debug.text("current lap: " + (game.time.now - currentLap), 200, 350);
-	game.debug.text("genome: " + NN.genome, 200, 400);
+	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 400);
 }
 
 // bestLap()
@@ -212,10 +214,10 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 		// reset car position
 		velocity = 0;
 		car.body.x = 570;
-		car.body.y = 100;
+		car.body.y = 80;
 		car.body.angle = 90;
 		if (driver == "NN")
-			NN.advanceGenome((game.time.now - currentLap)*-1);
+			NN.advanceGenome((game.time.now - currentLap));
 	}
 }
 

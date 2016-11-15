@@ -14,23 +14,26 @@ NN.init = function(inputs, outputs, numGenomes, selection){
 		NN.genomes.push( new Architect.Perceptron(inputs, 4, 4, outputs) );
 	NN.numGenomes = numGenomes;
 	NN.selection = selection;
+	NN.mutationProp = 0.2;
 }
 
 NN.activate = function(sensorData){
 	// get output for sensor inputs
 	var output = NN.genomes[NN.genome].activate([
-		sensorData.si.sensor1.d,
-		sensorData.si.sensor2.d,
-		sensorData.si.sensor3.d
+		sensorData.sensor1.d,
+		sensorData.sensor2.d,
+		sensorData.sensor3.d
 	]);
 	return output;
 }
 
 NN.advanceGenome = function(fitness){
-	NN.genomes[genome].fitness = fitness; // assign fitness
+	NN.genomes[NN.genome].fitness = fitness; // assign fitness
 	NN.genome++; // advance genome
-	if (NN.genome > NN.numGenomes) // next generation
+	if (NN.genome > NN.numGenomes-1){
+		console.log("next generation");
 		NN.createNextGeneration();
+	} // next generation
 }
 
 NN.createNextGeneration = function(){
@@ -78,7 +81,7 @@ NN.mutate = function(nn){
 	nnNeurons = nn.neurons;
 	for (var i = 0; i < nnNeurons.length; i++){
 		if (Math.random() < 0.2){
-			nnNeurons[i]['bias'] += annNeurons[i]['bias'] * (Math.random() - 0.5) * 3 + (Math.random() - 0.5);
+			nnNeurons[i]['bias'] += nnNeurons[i]['bias'] * (Math.random() - 0.5) * 3 + (Math.random() - 0.5);
 
 		}
 	}
@@ -87,7 +90,7 @@ NN.mutate = function(nn){
 	nnConnections = nn.connections;
 	for (var i = 0; i < nnConnections.length; i++){
 		if (Math.random() < 0.2){
-			nnNeurons[i]['bias'] += annNeurons[i]['bias'] * (Math.random() - 0.5) * 3 + (Math.random() - 0.5);
+			nnConnections[i]['weight'] += nnConnections[i]['weight'] * (Math.random() - 0.5) * 3 + (Math.random() - 0.5);
 
 		}
 	}
@@ -104,8 +107,8 @@ NN.crossOver = function(nn1, nn2){
 
 	nn1 = _.cloneDeep(nn1);
 	nn2 = _.cloneDeep(nn2);
-	nn1Neurons = nn1Neurons.neurons;
-	nn2Neurons = nn2Neurons.neurons;
+	nn1Neurons = nn1.neurons;
+	nn2Neurons = nn1.neurons;
 
 	var slicePoint = Math.round(nn1.length * Math.random());
 
