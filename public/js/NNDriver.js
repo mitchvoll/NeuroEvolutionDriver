@@ -44,25 +44,26 @@ NN.createNextGeneration = function(){
 	NN.genomes = NN.getBestGenomes(NN.selection);
 	var bestGenomes = _.clone(NN.genomes);
 
-	// peform the crossover and mutation
+	// peform the crossover and mutation by selecting two random genomes
+	// from the best selection and add this new genome to the generation
+	// until there are numGenomes - 2 remaining
 	while (NN.genomes.length < NN.numGenomes - 2){
 		// select two random genomes
 		var genome1 = _.sample(bestGenomes).toJSON();
 		var genome2 = _.sample(bestGenomes).toJSON();
 		 
+		// cross over the two randomly selected genomes
 		var crossOver = NN.crossOver(genome1, genome2);
-		// mutate using genomes
+		// mutate using the new genome created from the crossover
 		var mutatedGenome = NN.mutate(crossOver);
-		NN.genomes.push(Network.fromJSON(mutatedGenome));
+		NN.genomes.push(Network.fromJSON(mutatedGenome)); // add to next generation
 	}
 
-	// perform just the mutation
+	// perform just the mutation for the remaining two genomes 
 	while (NN.genomes.length < NN.numGenomes){
-		// get random genome
-		var genome = _.sample(bestGenomes).toJSON();
-		NN.genomes.push( Network.fromJSON(NN.mutate(genome)) );
+		var genome = _.sample(bestGenomes).toJSON(); // get random genome
+		NN.genomes.push( Network.fromJSON(NN.mutate(genome)) ); // mutate and add to next generation
 	}
-	
 }
 
 // return the best n genomes by deleting the worst
@@ -121,3 +122,28 @@ NN.crossOver = function(nn1, nn2){
 	return nn1; 
 }
 
+// load specified generation genomes from the server
+NN.loadGeneration = function(filename){
+	console.log('loaded generation');
+	$.get('loadGenome/'+filename, function(data){
+		var genomes = JSON.parse(data);
+		// reset genome and generation counter
+		NN.genome = 0;
+		NN.generation = 0;
+		NN.genomes = []
+		// load genomes in to current genomes
+		NN.genomes = genomes.map(function(genome){ return Network.fromJSON(genome) });
+	});
+}
+
+// send the current generation genomes to the server to save as a file
+NN.saveGeneration = function(game, filename){
+	game.paused = true;
+	console.log('saving generation');
+	// create array of genomes objects 
+	var generation = NN.genomes.map(function(genome){ return genome.toJSON(); });
+	var serializedGen = JSON.stringify(generation);
+	$.post('saveGenome/'+filename, serializedGen, function(res){
+		console.log(res);
+	}, 'text');
+}

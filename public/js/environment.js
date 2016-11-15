@@ -4,10 +4,9 @@ var cursors, // keyboard
  	car, // car
 	track, // the physics object for the track boundaries
  	velocity = 0, // initial car velocity
-	lastDistanceCollision, // the id of the last distance lien collided
+	distance, lastDistanceCollision, // the id of the last distance lien collided
 	sensor1, sensor2, sensor3, si = {}, // sensors
 	distance = 0, currentLap, lapTimes = [];
-
 
 // preload function 
 // Takes no arguments and returns void
@@ -75,6 +74,8 @@ function create() {
 
 	// initialize ANN driver
 	NN.init(3, 1, 10, 4);
+	// load previous generation
+	NN.loadGeneration('generation178.json');
 }
 
 // update()
@@ -196,6 +197,17 @@ function bestLap(){
 	return Math.min.apply(Math, lapTimes); // return the best lap time
 }
 
+function resetCar(){
+
+}
+
+function resetGame(){
+	game.paused = true;
+	resetCar();
+	distance = 0;
+	currentLap = game.time.now;
+}
+
 
 // carCollision() // called when car hits a collidable object (Track boundaries, finish line) // Takes the two colliding bodies, their shapes, and the equation to use for the collision
 // returns void
@@ -211,24 +223,21 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 		}
 	}
 	else if (bodyB.id >= 8 && bodyB.id != lastDistanceCollision){ // collided with distance line
-		console.log("hit distanceLine")
-		console.log(bodyB);
 		distance++;
 		lastDistanceCollision = bodyB.id;
 	}
 	// collided with the track boundaries
 	else if (bodyB.id == 5){
 		console.log("hit wall");
-	console.log(bodyB);
-		//console.log(car.x, car.y);
-		// reset car position
+		if (driver == "NN"){ // update NN with how well this genome performed
+			NN.advanceGenome(distance);
+		}	
 		distance = 0;
+		// reset car position
 		velocity = 0;
 		car.body.x = 570;
 		car.body.y = 80;
 		car.body.angle = 90;
-		if (driver == "NN")
-			NN.advanceGenome((distance));
 	}
 }
 
@@ -247,7 +256,7 @@ function getLine(angle, distance){
 // returns JSON object containing point for intersections with trackLines for the given line
 function lineIntersect(line){
 	// point of intersection and distance
-	var point = null, distance = Number.POSITIVE_INFINITY;
+	var point = null, distance = 1000;
 	for (var i in trackLines){
 		var p = line.intersects(trackLines[i]); // point if intersection
 		// check for intersection and if this intersection is the closest
