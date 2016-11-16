@@ -4,8 +4,8 @@ var cursors, // keyboard
  	car, // car
 	track, // the physics object for the track boundaries
  	velocity = 0, // initial car velocity
-	distance, lastDistanceCollision, // the id of the last distance lien collided
-	eistance = 0, currentLap, lapTimes = [];
+	distance=0, lastDistanceCollision, // the id of the last distance lien collided
+	lastLap, currentLap, lapTimes = [];
 
 // preload function 
 // Takes no arguments and returns void
@@ -74,7 +74,8 @@ function create() {
 	// initialize ANN driver
 	NN.init(3, 1, 10, 4);
 	// load previous generation
-	NN.loadGeneration('generation178.json');
+	//NN.loadGeneration('generation178.json');
+	NN.loadGeneration('generation186.json');
 }
 
 // update()
@@ -140,6 +141,7 @@ function render(){
 	//game.debug.text("sensor3 : " + Math.round(si.sensor3.d), 200, 300);
 	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000 + " seconds", 200, 250);
 	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
+	game.debug.text("Last lap: " + (lastLap ? lastLap/1000 : "-------") + " seconds", 400, 375);
 	renderLaptimes(200, 350);
 }
 
@@ -151,7 +153,7 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 		if ( !currentLap || (currentLap + 2000 < game.time.now) ){
 		console.log("hit finish, distance: " + distance);
 			//console.log("passed finish");
-			var lastLap = game.time.now - currentLap;
+			lastLap = game.time.now - currentLap;
 			if (lastLap) addLap(lastLap);
 			//console.log(lapTimes);
 			currentLap = game.time.now; // the time the car crosses the start finish
