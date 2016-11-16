@@ -5,8 +5,7 @@ var cursors, // keyboard
 	track, // the physics object for the track boundaries
  	velocity = 0, // initial car velocity
 	distance, lastDistanceCollision, // the id of the last distance lien collided
-	sensor1, sensor2, sensor3, si = {}, // sensors
-	distance = 0, currentLap, lapTimes = [];
+	eistance = 0, currentLap, lapTimes = [];
 
 // preload function 
 // Takes no arguments and returns void
@@ -45,7 +44,7 @@ function create() {
 	trackLines = trackLines.map(function(obj){ return new Phaser.Line(obj.x1, obj.y1, obj.x2, obj.y2) });
 	
 	// add car
-	car = game.add.sprite(570, 80, 'car');
+	car = game.add.sprite(620, 80, 'car');
 	game.physics.p2.enable(car);
 	car.body.clearShapes();
 	car.body.loadPolygon('collisions', 'car');
@@ -133,11 +132,44 @@ function update(){
 // Takes no arguments and returns void 
 // Draws the textual information on screen that contains sensor and lap information
 function render(){
-	game.debug.text("sensor1 dist: " + Math.round(si.sensor1.d), 200, 200);
-	game.debug.text("sensor2 dist: " + Math.round(si.sensor2.d), 200, 250);
-	game.debug.text("sensor3 dist: " + Math.round(si.sensor3.d), 200, 300);
-	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap), 200, 350);
-	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 400);
+	var sensorText = "Middle sensor: " + Math.round(si.sensor1.d) + 
+		",   Left sensor : " + Math.round(si.sensor2.d) + 
+		",   Right sensor : " + Math.round(si.sensor3.d)
+	game.debug.text(sensorText, 200, 200);
+	//game.debug.text("sensor2 : " + Math.round(si.sensor2.d), 200, 250);
+	//game.debug.text("sensor3 : " + Math.round(si.sensor3.d), 200, 300);
+	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000 + " seconds", 200, 250);
+	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
+	renderLaptimes(200, 350);
+}
+
+// carCollision() // called when car hits a collidable object (Track boundaries, finish line) // Takes the two colliding bodies, their shapes, and the equation to use for the collision
+// returns void
+function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
+	// passed the start finish line
+	if (bodyB.id == startFinish.body.id){
+		if ( !currentLap || (currentLap + 2000 < game.time.now) ){
+		console.log("hit finish, distance: " + distance);
+			//console.log("passed finish");
+			var lastLap = game.time.now - currentLap;
+			if (lastLap) addLap(lastLap);
+			//console.log(lapTimes);
+			currentLap = game.time.now; // the time the car crosses the start finish
+			
+			// completed one lap
+			if (distance >= 38) { 
+				advanceDrivingLine(lastLap);
+			}
+		}
+	}
+	else if (bodyB.id >= 8 && bodyB.id != lastDistanceCollision){ // collided with distance line
+		distance++;
+		lastDistanceCollision = bodyB.id;
+	}
+	else if (bodyB.id == 5){ // collided with the track boundaries
+		console.log("hit wall");
+		advanceDrivingLine(game.time.now - currentLap);
+	}
 }
 
 // turnLeft()
@@ -191,14 +223,53 @@ function simpleDriver(speed=400, avoidanceThresh=80){
 	}
 }
 
+function advanceDrivingLine(lastLap){
+	// penalty is given by a 1 second increase for every distance marker short of the finish line
+	var penalty = (38 - distance)*1000; // penalty given in ms 
+	// use the negative of the fitness as the genetic algorithm will maximize the fitness value
+	var fitness =  (lastLap + penalty)*-1; 
+	console.log(fitness);
+	NN.advanceGenome(fitness);
+	resetCar();
+}
+
+function advanceSimple(){
+	NN.advanceGenome(distance);
+	resetCar();
+}
+
 // bestLap()
 // Takes no arguments, returns the minimum lap time
 function bestLap(){
-	return Math.min.apply(Math, lapTimes); // return the best lap time
+	return lapTimes[0];
+}
+
+// add laptime and only keep the best 5
+function addLap(laptime){
+	lapTimes.push(laptime);
+	lapTimes.sort(); 
+	while (lapTimes.length > 5)
+		lapTimes.pop();
+}
+
+function renderLaptimes(x, y){
+	game.debug.text("Best laps:", x, y);
+	for (i=0; i<5; i++){
+		var yOffset = 25*(i+1);
+		var text = i+1 + ": " + (lapTimes[i] ? lapTimes[i]/1000 + " seconds" : "---------");
+		console.log(text);
+		game.debug.text(text, x, y+yOffset);
+	}
 }
 
 function resetCar(){
-
+	distance = 0;
+	currentLap = game.time.now;
+	// reset car position
+	velocity = 0;
+	car.body.x = 625;
+	car.body.y = 80;
+	car.body.angle = 90;
 }
 
 function resetGame(){
@@ -206,39 +277,6 @@ function resetGame(){
 	resetCar();
 	distance = 0;
 	currentLap = game.time.now;
-}
-
-
-// carCollision() // called when car hits a collidable object (Track boundaries, finish line) // Takes the two colliding bodies, their shapes, and the equation to use for the collision
-// returns void
-function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
-	// passed the start finish line
-	if (bodyB.id == startFinish.body.id){
-		if ( !currentLap || (currentLap + 2000 < game.time.now) ){
-			//console.log("passed finish");
-			var lastLap = game.time.now - currentLap;
-			if (lastLap) lapTimes.push(lastLap);
-			//console.log(lapTimes);
-			currentLap = game.time.now; // the time the car crosses the start finish
-		}
-	}
-	else if (bodyB.id >= 8 && bodyB.id != lastDistanceCollision){ // collided with distance line
-		distance++;
-		lastDistanceCollision = bodyB.id;
-	}
-	// collided with the track boundaries
-	else if (bodyB.id == 5){
-		console.log("hit wall");
-		if (driver == "NN"){ // update NN with how well this genome performed
-			NN.advanceGenome(distance);
-		}	
-		distance = 0;
-		// reset car position
-		velocity = 0;
-		car.body.x = 570;
-		car.body.y = 80;
-		car.body.angle = 90;
-	}
 }
 
 // getLine()
