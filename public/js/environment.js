@@ -75,7 +75,8 @@ function create() {
 	NN.init(3, 1, 10, 4);
 	// load previous generation
 	//NN.loadGeneration('generation178.json');
-	NN.loadGeneration('generation186.json');
+	//NN.loadGeneration('generation186.json');
+	NN.loadGeneration('generation245.json');
 }
 
 // update()
@@ -139,7 +140,7 @@ function render(){
 	game.debug.text(sensorText, 200, 200);
 	//game.debug.text("sensor2 : " + Math.round(si.sensor2.d), 200, 250);
 	//game.debug.text("sensor3 : " + Math.round(si.sensor3.d), 200, 300);
-	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000 + " seconds", 200, 250);
+	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000, 200, 250);
 	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
 	game.debug.text("Last lap: " + (lastLap ? lastLap/1000 : "-------") + " seconds", 400, 375);
 	renderLaptimes(200, 350);
@@ -159,7 +160,7 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 			currentLap = game.time.now; // the time the car crosses the start finish
 			
 			// completed one lap
-			if (distance >= 38) { 
+			if (distance >= 36) { 
 				advanceDrivingLine(lastLap);
 			}
 		}
@@ -179,7 +180,7 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 // Modifies the car's angular velocity and forward velocity to perform a left turn
 function turnLeft(){
 	car.body.angularVelocity = -9*(velocity/1000);
-	velocity *= 0.75;
+	velocity *= 0.55;
 }
 
 // turnRight()
@@ -187,7 +188,7 @@ function turnLeft(){
 // Modifies the car's angular velocity and forward velocity to perform a right turn
 function turnRight(){
 	car.body.angularVelocity = 9*(velocity/1000);
-	velocity *= 0.75;
+	velocity *= 0.55;
 }
 
 function ANNDriver(speed){
@@ -259,7 +260,6 @@ function renderLaptimes(x, y){
 	for (i=0; i<5; i++){
 		var yOffset = 25*(i+1);
 		var text = i+1 + ": " + (lapTimes[i] ? lapTimes[i]/1000 + " seconds" : "---------");
-		console.log(text);
 		game.debug.text(text, x, y+yOffset);
 	}
 }
