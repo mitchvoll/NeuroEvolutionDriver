@@ -4,6 +4,7 @@ var cursors, // keyboard
  	car, // car
 	track, // the physics object for the track boundaries
  	velocity = 0, // initial car velocity
+	delayTime,
 	distance=0, lastDistanceCollision, // the id of the last distance lien collided
 	lastLap, currentLap, lapTimes = [];
 
@@ -74,9 +75,9 @@ function create() {
 	// initialize ANN driver
 	NN.init(3, 1, 10, 4);
 	// load previous generation
-	//NN.loadGeneration('generation178.json');
-	//NN.loadGeneration('generation186.json');
-	NN.loadGeneration('generation245.json');
+	//NN.loadGeneration('generation178.json'); // just learning to navigate the track
+	//NN.loadGeneration('generation186.json'); // starting to learn the lines but developed a shake
+	NN.loadGeneration('generation500.json'); // learned the driving lines
 }
 
 // update()
@@ -89,20 +90,9 @@ function update(){
 	sensor1 = getLine(0, 250);	
 	sensor2 = getLine(45, 250);
 	sensor3 = getLine(-45, 250);
-	game.debug.geom(sensor1);
-	game.debug.geom(sensor2);
-	game.debug.geom(sensor3);	// point of intersection for each sensor every frame 
-	game.debug.geom(startFinish);
-	for (var i in distanceLines){
-		game.debug.geom(distanceLines[i]);
-	}
 
 	si = getSensorData(); 
-	// draw circle for sensor intersections 
-	for (var key in si){
-		if (si[key].p) // if intersection
-			game.debug.geom( new Phaser.Circle(si[key].p.x-2, si[key].p.y-2, 15), 'rgba(50, 50, 255, 1)');
-	}
+	
 
 	// Keyboard control
 	// update velocity
@@ -121,9 +111,9 @@ function update(){
 	else
 		car.body.angularVelocity = 0;
 	
-	// drive using simple driver
-	//simpleDriver();
-	ANNDriver(400);
+	
+	//simpleDriver(); // drive using simple driver
+	ANNDriver(400); // drive using the genetic algorithm
 
 	// Set X and Y Speed of Velocity
 	car.body.velocity.x = velocity * Math.cos((car.angle-90)*0.01745);
@@ -134,18 +124,32 @@ function update(){
 // Takes no arguments and returns void 
 // Draws the textual information on screen that contains sensor and lap information
 function render(){
+	// display information about the current lap time, best laptimes,
+	// distance, sensors, and genetic algorithm information
 	var sensorText = "Middle sensor: " + Math.round(si.sensor1.d) + 
 		",   Left sensor : " + Math.round(si.sensor2.d) + 
-		",   Right sensor : " + Math.round(si.sensor3.d)
+		",   Right sensor : " + Math.round(si.sensor3.d);
 	game.debug.text(sensorText, 200, 200);
-	//game.debug.text("sensor2 : " + Math.round(si.sensor2.d), 200, 250);
-	//game.debug.text("sensor3 : " + Math.round(si.sensor3.d), 200, 300);
 	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000, 200, 250);
 	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
 	game.debug.text("Last lap: " + (lastLap ? lastLap/1000 : "-------") + " seconds", 400, 375);
 	renderLaptimes(200, 350);
-}
 
+	// display lines
+	game.debug.geom(sensor1);
+	game.debug.geom(sensor2);
+	game.debug.geom(sensor3);	// point of intersection for each sensor every frame 
+	game.debug.geom(startFinish);
+	for (var i in distanceLines){
+		game.debug.geom(distanceLines[i]);
+	}
+	// draw circle for sensor intersections 
+	for (var key in si){
+		if (si[key].p) // if intersection
+			game.debug.geom( new Phaser.Circle(si[key].p.x-2, si[key].p.y-2, 15), 'rgba(50, 50, 255, 1)');
+	}
+
+}
 // carCollision() // called when car hits a collidable object (Track boundaries, finish line) // Takes the two colliding bodies, their shapes, and the equation to use for the collision
 // returns void
 function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
@@ -162,6 +166,8 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 			// completed one lap
 			if (distance >= 36) { 
 				advanceDrivingLine(lastLap);
+				game.paused = true;
+				setTimeout(function(){ game.paused = false; }, 500); // resume game after 1 second
 			}
 		}
 	}
@@ -191,7 +197,7 @@ function turnRight(){
 	velocity *= 0.55;
 }
 
-function ANNDriver(speed){
+function ANNDriver(speed=400){
 	driver = "NN";
 	velocity = speed;
 
@@ -250,7 +256,7 @@ function bestLap(){
 // add laptime and only keep the best 5
 function addLap(laptime){
 	lapTimes.push(laptime);
-	lapTimes.sort(); 
+	lapTimes.sort(function(a,b){ return a-b; }); 
 	while (lapTimes.length > 5)
 		lapTimes.pop();
 }
@@ -272,6 +278,7 @@ function resetCar(){
 	car.body.x = 625;
 	car.body.y = 80;
 	car.body.angle = 90;
+	game.paused = false;
 }
 
 function resetGame(){

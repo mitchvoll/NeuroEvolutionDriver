@@ -98,7 +98,7 @@ NN.mutate = function(nn){
 	return nn;
 }
 
-// given to genomes peform crossover 
+// given two genomes peform crossover 
 NN.crossOver = function(nn1, nn2){
 	if (Math.random() > 0.5){ // swap probability
 		var temp = nn1;
@@ -111,12 +111,12 @@ NN.crossOver = function(nn1, nn2){
 	nn1Neurons = nn1.neurons;
 	nn2Neurons = nn1.neurons;
 
+	// select a random amout of neurons to perform a cross over of networks neurons
 	var slicePoint = Math.round(nn1.length * Math.random());
-
-	for (var key = slicePoint; key < nn1Neurons; key++){
-		var temp = nn1Neurons[key]['bias'];
-		nn1Neurons[key]['bias'] = nn2[key]['bias'];
-		nn2Neurons[key]['bias'] = temp;
+	for (var i = slicePoint; i < nn1Neurons; i++){
+		var temp = nn1Neurons[i]['bias'];
+		nn1Neurons[i]['bias'] = nn2[i]['bias'];
+		nn2Neurons[i]['bias'] = temp;
 	}
 
 	return nn1; 
