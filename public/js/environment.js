@@ -5,7 +5,7 @@ var cursors, // keyboard
 	track, // the physics object for the track boundaries
  	velocity = 0, // initial car velocity
 	delayTime,
-	distance=0, lastDistanceCollision, // the id of the last distance lien collided
+	distance = 0, lastDistanceCollision, // the id of the last distance lien collided
 	lastLap, currentLap, lapTimes = [];
 
 // preload function 
@@ -63,7 +63,7 @@ function create() {
 		var line = game.add.sprite(obj.x1, obj.y1, null);
 		game.physics.p2.enable(line, true);
 		line.body.static = true;
-		line.body.angle = Math.atan((obj.x2-obj.x1)/(obj.y2-obj.y1))*(-180/3.14);;
+		line.body.angle = Math.atan((obj.x2-obj.x1) / (obj.y2-obj.y1)) * (-180 / 3.14);;
 		var distBetweenLines = Math.sqrt( Math.pow(obj.x2-obj.x1, 2) + Math.pow(obj.y2-obj.y1, 2) );
 		line.body.setRectangle(5, distBetweenLines, 0, distBetweenLines/2);
 		line.body.data.shapes[0].sensor = true;
@@ -87,9 +87,9 @@ function create() {
 
 function update(){
 	// get lines for sensors 
-	sensor1 = getLine(0, 250);	
-	sensor2 = getLine(45, 250);
-	sensor3 = getLine(-45, 250);
+	sensor1 = getLine(0, 250); // Middle Sensor	
+	sensor2 = getLine(45, 250); // Left Sensor
+	sensor3 = getLine(-45, 250); // Right sensor
 
 	si = getSensorData(); 
 	
@@ -130,7 +130,7 @@ function render(){
 		",   Left sensor : " + Math.round(si.sensor2.d) + 
 		",   Right sensor : " + Math.round(si.sensor3.d);
 	game.debug.text(sensorText, 200, 200);
-	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap)/1000, 200, 250);
+	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap) / 1000, 200, 250);
 	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
 	game.debug.text("Last lap: " + (lastLap ? lastLap/1000 : "-------") + " seconds", 400, 375);
 	renderLaptimes(200, 350);
@@ -185,7 +185,7 @@ function carCollision(bodyA, bodyB, shapeA, shapeB, equation){
 // Takes no arguments and returns void
 // Modifies the car's angular velocity and forward velocity to perform a left turn
 function turnLeft(){
-	car.body.angularVelocity = -9*(velocity/1000);
+	car.body.angularVelocity = -9 * (velocity / 1000);
 	velocity *= 0.55;
 }
 
@@ -193,11 +193,11 @@ function turnLeft(){
 // Takes no arguments and returns void
 // Modifies the car's angular velocity and forward velocity to perform a right turn
 function turnRight(){
-	car.body.angularVelocity = 9*(velocity/1000);
+	car.body.angularVelocity = 9 * (velocity / 1000);
 	velocity *= 0.55;
 }
 
-function ANNDriver(speed=400){
+function ANNDriver(speed = 400){
 	driver = "NN";
 	velocity = speed;
 
@@ -213,7 +213,7 @@ function ANNDriver(speed=400){
 }
 
 // simple driver turns away from walls its too close to 
-function simpleDriver(speed=400, avoidanceThresh=80){
+function simpleDriver(speed = 400, avoidanceThresh=80){
 	// always move
 	velocity = speed;
 
@@ -234,9 +234,9 @@ function simpleDriver(speed=400, avoidanceThresh=80){
 
 function advanceDrivingLine(lastLap){
 	// penalty is given by a 1 second increase for every distance marker short of the finish line
-	var penalty = (38 - distance)*1000; // penalty given in ms 
+	var penalty = (38 - distance) * 1000; // penalty given in ms 
 	// use the negative of the fitness as the genetic algorithm will maximize the fitness value
-	var fitness =  (lastLap + penalty)*-1; 
+	var fitness =  (lastLap + penalty) * -1; 
 	console.log(fitness);
 	NN.advanceGenome(fitness);
 	resetCar();
@@ -256,16 +256,16 @@ function bestLap(){
 // add laptime and only keep the best 5
 function addLap(laptime){
 	lapTimes.push(laptime);
-	lapTimes.sort(function(a,b){ return a-b; }); 
+	lapTimes.sort(function(a, b){ return a-b; }); 
 	while (lapTimes.length > 5)
 		lapTimes.pop();
 }
 
 function renderLaptimes(x, y){
 	game.debug.text("Best laps:", x, y);
-	for (i=0; i<5; i++){
-		var yOffset = 25*(i+1);
-		var text = i+1 + ": " + (lapTimes[i] ? lapTimes[i]/1000 + " seconds" : "---------");
+	for (i = 0; i < 5; i++){
+		var yOffset = 25 * (i + 1);
+		var text = i + 1 + ": " + (lapTimes[i] ? lapTimes[i] / 1000 + " seconds" : "---------");
 		game.debug.text(text, x, y+yOffset);
 	}
 }
@@ -293,8 +293,8 @@ function resetGame(){
 // Draws a line at the angle for the distance from the car
 // returns the line as a Phaser Line object
 function getLine(angle, distance){
-	var x2 = Math.cos((car.angle-(90+angle))*0.01745)*distance;
-	var y2 = Math.sin((car.angle-(90+angle))*0.01745)*distance;
+	var x2 = Math.cos((car.angle - (90 + angle)) * 0.01745) * distance;
+	var y2 = Math.sin((car.angle - (90 + angle)) * 0.01745) * distance;
 	return new Phaser.Line(car.x, car.y, car.x + x2, car.y + y2);
 }
 
@@ -320,7 +320,7 @@ function lineIntersect(line){
 // returns the intersection data for each sensor as a JSON object
 function getSensorData(){
 	return { 
-		sensor1: lineIntersect(sensor1),
+	    sensor1: lineIntersect(sensor1),
 	    sensor2: lineIntersect(sensor2),
 	    sensor3: lineIntersect(sensor3) 
 	};
