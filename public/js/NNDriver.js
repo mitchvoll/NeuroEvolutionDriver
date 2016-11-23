@@ -35,7 +35,6 @@ NeuroEvolution.prototype.createNextGeneration = function(){
 
 	console.log(this.genomes);
 	this.keepBestGenomes(); // kill worst genomes and copy the best for crossover
-	//var bestGenomes = _.cloneDeep(this.genomes); // deep copy
 	var bestGenomes = JSON.parse(JSON.stringify(this.genomes)); // deep copy
 
 	// peform the crossover and mutation by selecting two random genomes
