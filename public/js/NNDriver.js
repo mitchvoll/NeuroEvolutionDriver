@@ -127,14 +127,17 @@ NeuroEvolution.prototype.crossOver = function(net1, net2){
 // load specified generation genomes from the server
 NeuroEvolution.prototype.loadGeneration = function(filename){
 	console.log('loaded generation');
+	var self = this;
 	$.get('loadGenome/'+filename, function(data){
 		var genomes = JSON.parse(data);
 		// reset genome and generation counter
-		this.genome = 0;
-		this.generation = 0;
-		this.genomes = []
+		self.genome = 0;
+		self.generation = 0;
+		self.genomes = []
 		// load genomes in to current genomes
-		this.genomes = genomes.map(function(genome){ return Network.fromJSON(genome) });
+		self.genomes = genomes.map(function(genome){ return Network.fromJSON(genome) });
+		console.log(self.genomes)
+		debugger
 	});
 }
 
