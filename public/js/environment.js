@@ -74,11 +74,11 @@ function create() {
 
 	// initialize ANN driver
 	// inputs, outputs, population size, n genomes to carry forward, mutation rate
-	NN = new NeuroEvolution(3, 1, 20, 2, 0.4);
+	NE = new NeuroEvolution(3, 1, 20, 2, 0.4);
 	// load previous generation
-	//NN.loadGeneration('generation178.json'); // just learning to navigate the track
-	//NN.loadGeneration('generation186.json'); // starting to learn the lines but developed a shake
-	NN.loadGeneration('generation500.json'); // learned the driving lines
+	//NE.loadGeneration('generation178.json'); // just learning to navigate the track
+	//NE.loadGeneration('generation186.json'); // starting to learn the lines but developed a shake
+	NE.loadGeneration('generation500.json'); // learned the driving lines
 }
 
 // update()
@@ -132,7 +132,7 @@ function render(){
 		",   Right sensor : " + Math.round(si.sensor3.d);
 	game.debug.text(sensorText, 200, 200);
 	game.debug.text("distance: " + distance + ", current lap: " + (game.time.now - currentLap) / 1000, 200, 250);
-	game.debug.text("genome: " + NN.genome + ", generation: " + NN.generation, 200, 300);
+	game.debug.text("genome: " + NE.genome + ", generation: " + NE.generation, 200, 300);
 	game.debug.text("Last lap: " + (lastLap ? lastLap/1000 : "-------") + " seconds", 400, 375);
 	renderLaptimes(200, 350);
 
@@ -202,7 +202,7 @@ function ANNDriver(speed = 400){
 	driver = "NN";
 	velocity = speed;
 
-	var output = NN.activate([si.sensor1.d, si.sensor2.d, si.sensor3.d]);
+	var output = NE.activate([si.sensor1.d, si.sensor2.d, si.sensor3.d]);
 	//console.log(output);
 	if (output > 0.666)
 		turnRight();
@@ -239,12 +239,12 @@ function advanceDrivingLine(lastLap){
 	var fitness =  (lastLap + penalty); 
 
 	console.log(fitness);
-	NN.advanceGenome(fitness);
+	NE.advanceGenome(fitness);
 	resetCar();
 }
 
 function advanceSimple(){
-	NN.advanceGenome(distance);
+	NE.advanceGenome(distance);
 	resetCar();
 }
 
