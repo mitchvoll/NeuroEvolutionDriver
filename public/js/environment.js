@@ -73,7 +73,7 @@ function create() {
 	car.body.onBeginContact.add(carCollision, this); // check for car hitting wall
 
 	// initialize ANN driver
-	NN.init(3, 1, 10, 4);
+	NN = new NeuroEvolution(3, 1, 20, 2, 0.4);
 	// load previous generation
 	//NN.loadGeneration('generation178.json'); // just learning to navigate the track
 	//NN.loadGeneration('generation186.json'); // starting to learn the lines but developed a shake
@@ -201,7 +201,7 @@ function ANNDriver(speed=400){
 	driver = "NN";
 	velocity = speed;
 
-	var output = NN.activate(si);
+	var output = NN.activate([si.sensor1.d, si.sensor2.d, si.sensor3.d]);
 	//console.log(output);
 	if (output > 0.666)
 		turnRight();
@@ -235,8 +235,7 @@ function simpleDriver(speed=400, avoidanceThresh=80){
 function advanceDrivingLine(lastLap){
 	// penalty is given by a 1 second increase for every distance marker short of the finish line
 	var penalty = (38 - distance)*1000; // penalty given in ms 
-	// use the negative of the fitness as the genetic algorithm will maximize the fitness value
-	var fitness =  (lastLap + penalty)*-1; 
+	var fitness =  (lastLap + penalty); 
 	console.log(fitness);
 	NN.advanceGenome(fitness);
 	resetCar();
