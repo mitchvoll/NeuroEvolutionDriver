@@ -73,6 +73,7 @@ function create() {
 	car.body.onBeginContact.add(carCollision, this); // check for car hitting wall
 
 	// initialize ANN driver
+	// inputs, outputs, population size, n genomes to carry forward, mutation rate
 	NN = new NeuroEvolution(3, 1, 20, 2, 0.4);
 	// load previous generation
 	//NN.loadGeneration('generation178.json'); // just learning to navigate the track

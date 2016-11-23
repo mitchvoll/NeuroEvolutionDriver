@@ -23,7 +23,7 @@ NeuroEvolution.prototype.activate = function(data){
 NeuroEvolution.prototype.advanceGenome = function(fitness){
 	this.genomes[this.genome].fitness = fitness; // assign fitness to the current genome 
 	this.genome++; // advance genome
-	if (this.genome > this.popSize-1){
+	if (this.genome > this.genomes.length-1){
 		console.log("advancing generation");
 		this.createNextGeneration();
 	}
