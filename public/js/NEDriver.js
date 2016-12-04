@@ -11,6 +11,7 @@ var NeuroEvolution = function(inputs, outputs, popSize, nBest, mutationProb=0.2)
 	this.mutationProb = mutationProb; // the probability of a mutation
 	this.genome = 0; // initialize the current genome
 	this.generation = 0; // initialize the current generation
+	return this; // return this NeuroEvolution object
 }
 
 // activate the current genome
@@ -137,7 +138,6 @@ NeuroEvolution.prototype.loadGeneration = function(filename){
 		// load genomes in to current genomes
 		self.genomes = genomes.map(function(genome){ return Network.fromJSON(genome) });
 		console.log(self.genomes)
-		debugger
 	});
 }
 
