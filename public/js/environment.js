@@ -2,7 +2,7 @@ var GameState = function(game){  }; // GameState object
 
 GameState.prototype.preload = function(){
 	// load sprites
-	this.game.load.image('map', 'assets/map.jpg');
+	this.game.load.image('map', 'assets/map2.jpg');
 	this.game.load.spritesheet('car', 'assets/car2.png');
 
 	// load hitboxes
@@ -43,15 +43,15 @@ GameState.prototype.render = function(){
 	var sensorText = "Middle sensor: " + Math.round(this.car.sensors.middle.d) + 
 		",   Left sensor : " + Math.round(this.car.sensors.left.d) + 
 		",   Right sensor : " + Math.round(this.car.sensors.right.d);
-	this.game.debug.text(sensorText, 200, 200);
-	this.game.debug.text("distance: " + this.car.distance + ", current lap: " + (this.game.time.now - this.car.currentLap) / 1000, 200, 250);
-	this.game.debug.text("genome: " + this.NE.genome + ", generation: " + this.NE.generation, 200, 300);
-	this.game.debug.text("Last lap: " + (this.car.lastLap ? this.car.lastLap/1000 : "-------") + " seconds", 400, 375);
-	this.game.debug.text("Best laps: ", 200, 350);
+	this.game.debug.text(sensorText, 200, 200, "#000");
+	this.game.debug.text("distance: " + this.car.distance + ", current lap: " + (this.game.time.now - this.car.currentLap) / 1000, 200, 250, "#000");
+	this.game.debug.text("genome: " + this.NE.genome + ", generation: " + this.NE.generation, 200, 300, "#000");
+	this.game.debug.text("Last lap: " + (this.car.lastLap ? this.car.lastLap/1000 : "-------") + " seconds", 400, 375, "#000");
+	this.game.debug.text("Best laps: ", 200, 350, "#000");
 	for (i = 0; i < 5; i++){
 		var yOffset = 25 * (i + 1);
 		var text = i + 1 + ": " + (this.car.laptimes[i] ? this.car.laptimes[i] / 1000 + " seconds" : "---------");
-		game.debug.text(text, 200, 350+yOffset);
+		game.debug.text(text, 200, 350+yOffset, "#000");
 	}
 
 	// display lines
@@ -107,7 +107,7 @@ var Track = function(game){
 		line.body.data.shapes[0].sensor = true;
 	});
 
-	// add start finish line
+	// add start finish line/
 	this.startFinish = game.add.sprite(625, 10, null); 
 	game.physics.p2.enable(this.startFinish, true);
 	this.startFinish.body.static = true;
@@ -162,7 +162,8 @@ Car.prototype.update = function(){
 	}
 	
 	//this.simpleDriver(); // drive using simple driver
-	this.NEDriver(400); // drive using the genetic algorithm
+	this.NEDriver(600); // drive using the genetic algorithm
+	//this.manualDriver();
 	
 	// Set X and Y Speed of Velocity
 	this.body.velocity.x = this.velocity * Math.cos((this.angle-90)*0.01745);
@@ -192,6 +193,10 @@ Car.prototype.turnRight = function(){
 	this.velocity *= 0.55;
 }
 
+//Car.prototype.turnRightRealistic = function(){
+//	this.body.angularVelocity
+//}
+
 // Make driving decisions using the NeuroEvolution model
 Car.prototype.NEDriver = function(speed){
 	this.velocity = speed;
@@ -203,6 +208,24 @@ Car.prototype.NEDriver = function(speed){
 		this.turnLeft();
 	else // drive straight
 		this.body.angularVelocity = 0;
+}
+
+Car.prototype.manualDriver = function(){
+	// update velocity
+	if (this.gameState.cursors.up.isDown && this.velocity <= 200) // speed up
+		this.velocity += 30;
+	else if (this.gameState.cursors.down.isDown && this.velocity >= -200) // brake
+		this.velocity -= 20;
+	else if (Math.abs(this.velocity) > 0) // slow down
+		this.velocity = (Math.abs(this.velocity) - 1) * Math.sign(this.velocity);
+
+	// Rotation of Car
+	if (this.gameState.cursors.left.isDown)
+		this.turnLeft();
+	else if (this.gameState.cursors.right.isDown)
+		this.turnRight();
+	else
+		this.body.angularVelocity = 0; 
 }
 
 // simple driver turns away from walls its too close  
