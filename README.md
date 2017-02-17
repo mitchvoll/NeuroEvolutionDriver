@@ -1,4 +1,4 @@
-# NeuroEvolutionDriver - CISC452 Project
+# NeuroEvolutionDriver
 **2D autonomous car navigation with optimal driving lines through NeuroEvolution**
 
 *NeuroEvolution design influenced by [ivanseidel](https://github.com/ivanseidel)'s project [IAMDinosaur](https://github.com/ivanseidel/IAMDinosaur)*
