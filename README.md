@@ -3,8 +3,10 @@
 
 *NeuroEvolution design influenced by [ivanseidel](https://github.com/ivanseidel)'s project [IAMDinosaur](https://github.com/ivanseidel/IAMDinosaur)*
 
-
 ---
+
+![](https://github.com/mitchvoll/NeuroEvolutionDriver/raw/master/gen100.gif)
+
 The track/environment is built using the [phaser game engine](https://phaser.io/). The project is setup with a node server that allows for genomes to be loaded and saved.
 The important files and directories are explained here:
 - **index.html**: All js assets are loaded here.
